@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import NavbarDb from '../../../components/NavbarDb';
+// import NavbarDb from '../../../components/NavbarDb';
 
 const Index = () => {
   
@@ -41,7 +41,7 @@ useEffect(() => {
     
         <>
         {/* <NavbarDb/> */}
-        <NavbarDb/>
+        {/* <NavbarDb/> */}
             <div className="col-lg-9 mt-10  items-center justify-center gap-x-6  pt-14">
             <div className="row x-gap-20 y-gap-20 items-center p-3 mb-20 filter-items">
               

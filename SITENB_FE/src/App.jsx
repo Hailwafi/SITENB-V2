@@ -40,6 +40,8 @@ const TiketPegawai = lazy(() => import('./pages/Dashboard/TiketPegawai'));
 const TiketPublic = lazy(() => import('./pages/Dashboard/TiketPublic'));
 const StaffList = lazy(() => import('./pages/Dashboard/StaffList'));
 const StaffDetail = lazy(() => import('./pages/Dashboard/StaffDetail'));
+const DataAb = lazy(() => import('./pages/Dashboard/DataAb'));
+const DetailAbPg = lazy(() => import('./pages/Dashboard/DetailAbPg'));
 
 const WorkStaff = lazy(() => import('./pages/Dashboard/Admin/WorkStaff'));
 const ListUser = lazy(() => import('./pages/Dashboard/Admin/ListUser'));
@@ -105,6 +107,8 @@ const AdminLayout = withAuthenticationAdmin(() => {
             <Route path="/TiketPublic" element={<TiketPublic />} />
             <Route path="/StaffList" element={<StaffList />} />
             <Route path="/StaffDetail/:id" element={<StaffDetail />} />
+            <Route path="/DataAb" element={<DataAb />} />
+            <Route path="/DetailAbPg" element={<DetailAbPg />} />
           </Routes>
         </Suspense>
       </div>
@@ -131,18 +135,53 @@ const LeaderLayout = withAuthenticationLeader(() => (
 ));
 
 // Staff Layout
-const StaffLayout = withAuthenticationStaff(() => (
-  <>
-    <NavbarDb />
-    <Suspense fallback={<div>Loading...</div>}>
-      <Routes>
-        <Route path="/" element={<Staff />} />
+// const StaffLayout = withAuthenticationStaff(() => (
+//   <>
+//     <NavTes />
+//     <Suspense fallback={<div>Loading...</div>}>
+//       <Routes>
+//         <Route path="/" element={<Staff />} />
+//         <Route path="/TaskPw" element={<TaskPw />} />
+//         <Route path="/TaskPb" element={<TaskPb />} />
+//         <Route path="/TaskList" element={<TaskList />} />
+//       </Routes>
+//     </Suspense>
+//   </>
+// ));
+
+const StaffLayout = withAuthenticationStaff(() => {
+  const [isOpen, setIsOpen] = useState(true); 
+  const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsLargeScreen(window.innerWidth >= 768);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return (
+    <div className="flex min-h-screen transition-all">
+      <NavTes isOpen={isOpen} toggleNav={() => setIsOpen(!isOpen)} />
+
+     <div
+        className={`transition-all duration-300 flex-1 ${
+          isOpen ? "ml-64" : "ml-0 mx-auto"
+        } md:ml-64 max-w-4xl w-full`}
+      >
+
+        <Suspense fallback={<div>Loading...</div>}>
+          <Routes>
+          <Route path="/" element={<Staff />} />
         <Route path="/TaskPw" element={<TaskPw />} />
         <Route path="/TaskPb" element={<TaskPb />} />
         <Route path="/TaskList" element={<TaskList />} />
-      </Routes>
-    </Suspense>
-  </>
-));
+          </Routes>
+        </Suspense>
+      </div>
+    </div>
+  );
+});
 
 export default App;

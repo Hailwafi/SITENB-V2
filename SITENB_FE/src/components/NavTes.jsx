@@ -6,19 +6,19 @@ import {
   FolderIcon,
   ChevronDownIcon,
 } from "@heroicons/react/24/outline";
-import { FaUserPlus, FaUserTie, FaFileExport } from "react-icons/fa";
+import { FaUserPlus, FaUserTie, FaFileExport ,FaChartBar,FaAlignLeft,FaTicketAlt} from "react-icons/fa";
 import { Link, useLocation } from "react-router-dom";
 
 export default function NavTes({ isOpen, toggleNav }) {
   const [isResourcesOpen, setIsResourcesOpen] = useState(false);
+  const [isResourcesOpen2, setIsResourcesOpen2] = useState(false);
   const location = useLocation();
 
-  // Ambil role dari data login (localStorage atau sessionStorage)
   const role = localStorage.getItem("role") || sessionStorage.getItem("role") || "";
 
   const navigation = [
     { name: "Dashboard", href: "/Dashboard", role: "admin", icon: HomeIcon },
-    { name: "Tiket", href: "/Dashboard/Tiket", role: "admin", icon: FolderIcon },
+    // { name: "Tiket", href: "/Dashboard/Tiket", role: "admin", icon: FolderIcon },
     { name: "Pantau pekerjaan", href: "/Dashboard/StaffList", role: "admin", icon: FaUserTie },
     { name: "Users", href: "/Dashboard/ListUser", role: "admin", icon: FaUserPlus },
 
@@ -29,12 +29,10 @@ export default function NavTes({ isOpen, toggleNav }) {
     { name: "Dashboard", href: "/Staff", role: "staff", icon: HomeIcon },
   ];
 
-  // Isi dropdown berdasarkan role yang login
   const dropdownItems = {
     admin: [
-      { name: "Data Absen", href: "/Admin/DataAbsen", icon: FaFileExport },
-      { name: "Data Izin/Sakit", href: "/Admin/Data_Izin_Sakit", icon: FaFileExport },
-      { name: "Rekap", href: "/Admin/Rekap", icon: FaFileExport },
+      { name: "Data Absen", href: "/Dashboard/DataAb", icon: FaChartBar },
+      { name: "Data Izin/Sakit", href: "/Admin/Data_Izin_Sakit", icon: FaAlignLeft },
     ],
     kepala_subbag: [
       { name: "Laporan Bulanan", href: "/Leader/LaporanBulanan", icon: FaFileExport },
@@ -45,14 +43,27 @@ export default function NavTes({ isOpen, toggleNav }) {
       { name: "Presensi", href: "/Staff/Presensi", icon: FaFileExport },
     ],
   };
+  const dropdownItemsAK = {
+    admin: [
+      { name: "Tiket Pegawai", href: "/Dashboard/TiketPegawai", icon: FaTicketAlt },
+      { name: "Tiket Public", href: "/Dashboard/TiketPublic", icon: FaTicketAlt },
+    ],
+    kepala_subbag: [
+      { name: "Laporan Bulanan", href: "/Leader/LaporanBulanan", icon: FaFileExport },
+      { name: "Evaluasi Kinerja", href: "/Leader/EvaluasiKinerja", icon: FaFileExport },
+    ],
+    
+  };
 
   return (
     <div>
-      {/* Toggle Button */}
+      {/* Tombol Toggle (Selalu Muncul) */}
       <div className="fixed top-4 left-4 z-50">
-        <button className="bg-gray-900 text-white p-2 rounded-md" onClick={toggleNav}>
-          {isOpen ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
-        </button>
+        {!isOpen && (
+          <button className="bg-gray-900 text-white p-2 rounded-md" onClick={toggleNav}>
+            <Bars3Icon className="h-6 w-6" />
+          </button>
+        )}
       </div>
 
       {/* Navbar */}
@@ -61,14 +72,22 @@ export default function NavTes({ isOpen, toggleNav }) {
           isOpen ? "w-64" : "w-0"
         } overflow-hidden`}
       >
-        
-        <div className="px-4 mt-10">
-          <div className="flex items-center gap-3 mb-6">
+        {/* Header Navbar */}
+        <div className="flex items-center justify-between px-4 mt-4">
+          {/* Logo */}
+          <div className="flex items-center gap-3">
             <img src="bnpt.png" alt="Logo" className="h-12 w-auto" />
             <h1 className="text-lg font-semibold text-gray-700">SI-TENB</h1>
           </div>
 
-          {/* Navigasi Menu */}
+          {/* Tombol Close */}
+          <button className="text-gray-700 p-2" onClick={toggleNav}>
+            <XMarkIcon className="h-6 w-6" />
+          </button>
+        </div>
+
+        {/* Navigasi Menu */}
+        <div className="px-4 mt-6">
           {navigation
             .filter((item) => item.role === role)
             .map((item, index, arr) => (
@@ -83,7 +102,6 @@ export default function NavTes({ isOpen, toggleNav }) {
                   <span>{item.name}</span>
                 </Link>
 
-                {/* Dropdown Ditempatkan Setelah "Dashboard" */}
                 {index === 0 && dropdownItems[role] && (
                   <div>
                     <button
@@ -98,6 +116,33 @@ export default function NavTes({ isOpen, toggleNav }) {
                     {isResourcesOpen && (
                       <div className="ml-6 mt-2 space-y-1">
                         {dropdownItems[role].map((item) => (
+                          <Link
+                            key={item.name}
+                            to={item.href}
+                            className="flex items-center space-x-3 text-black hover:bg-gray-200 px-3 py-2 rounded-md"
+                          >
+                            <item.icon className="w-5 h-5" />
+                            <span>{item.name}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+                {index === 0 && dropdownItemsAK[role] && (
+                  <div>
+                    <button
+                      onClick={() => setIsResourcesOpen2(!isResourcesOpen2)}
+                      className="flex items-center space-x-3 w-full text-left text-black hover:bg-gray-200 px-3 py-2 rounded-md"
+                    >
+                      <FolderIcon className="w-5 h-5" />
+                      <span>Tiket</span>
+                      <ChevronDownIcon className="w-4 h-4" />
+                    </button>
+
+                    {isResourcesOpen2 && (
+                      <div className="ml-6 mt-2 space-y-1">
+                        {dropdownItemsAK[role].map((item) => (
                           <Link
                             key={item.name}
                             to={item.href}

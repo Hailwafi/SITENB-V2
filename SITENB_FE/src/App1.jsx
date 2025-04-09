@@ -42,7 +42,6 @@ import TambahUser from "./pages/Dashboard/Admin/TambahUser"
 
 function App(){
 
-  // const userRole = 'customer'; // Ganti dengan logika autentikasi yang sesuai
 
   return (
 <>
