@@ -46,8 +46,6 @@ use Illuminate\Support\Facades\Route;
             // dashboard
                 Route::get('/dashboard', App\Http\Controllers\Api\Admin\DashboardController::class);
 
-                Route::get('/dashboard/attendance', [App\Http\Controllers\Api\Admin\DashboardController::class, 'getAttendanceData']);
-
             // roles
                 Route::apiResource('/roles', App\Http\Controllers\Api\Admin\RoleController::class)
                 ->middleware('permission:roles.index|roles.store|roles.update|roles.delete');
@@ -78,6 +76,25 @@ use Illuminate\Support\Facades\Route;
                 Route::post('/profile-update', [App\Http\Controllers\ProfileController::class, 'update'])
                 ->middleware('permission:profiles.update');
 
+            // statistik absensi 
+                Route::get('/statistik-absensi', [App\Http\Controllers\Api\Admin\DashboardController::class, 'statistikAbsensi'])
+                ->middleware('auth:api');
+
+            // detail absensi
+                Route::get('/detail-absensi/{id}', [App\Http\Controllers\Api\Admin\DashboardController::class, 'detail'])
+                ->middleware('auth:api');
+
+
+            // melihat hasil pengajuan cuti/izin
+                Route::get('/pengajuan', [App\Http\Controllers\Api\Admin\DashboardController::class, 'getPengajuan'])
+                ->middleware('auth:api');
+
+            // detail pengajuan cuti/izin
+                Route::get('/pengajuan/{id}/detail', [App\Http\Controllers\Api\Admin\DashboardController::class, 'showDetail'])
+                ->middleware('auth:api');
+
+            // vertifikasi pengajuan dari admin
+                Route::post('/pengajuan/{id}/verifikasi', [App\Http\Controllers\PengajuanTidakHadirController::class, 'verifikasi']);  
         });
     });
 
@@ -93,10 +110,17 @@ use Illuminate\Support\Facades\Route;
 
             // dashboard
                 Route::get('/dashboard', [App\Http\Controllers\Api\User\UserDashboardController::class, 'index']);
+                Route::get('/statistik-absensi', [App\Http\Controllers\Api\User\UserDashboardController::class, 'statistikAbsensi'])
+                ->middleware('auth:api');
+                Route::get('/detail-absensi/{id}', [App\Http\Controllers\Api\User\UserDashboardController::class, 'detail'])
+                ->middleware('auth:api');
+                Route::get('/pengajuan', [App\Http\Controllers\Api\User\UserDashboardController::class, 'getPengajuan'])
+                ->middleware('auth:api');
+                Route::get('/pengajuan/{id}/detail', [App\Http\Controllers\Api\User\UserDashboardController::class, 'showDetail'])
+                ->middleware('auth:api');
 
             // absen
-                Route::post('/absen', [App\Http\Controllers\AbsenController::class, 'absen'])
-                ->middleware('permission:absens.absen');
+                Route::post('/absen', [App\Http\Controllers\AbsenController::class, 'absen']);
 
             // pengajuan cuti/izin/lembur
                 Route::get('/lihat', [App\Http\Controllers\PengajuanTidakHadirController::class, 'index']);

@@ -16,14 +16,21 @@ class Absen extends Model
         'user_id',
         'status',
         'waktu_absen',
-        // 'latitude',
-        // 'longitude',
-        // 'is_valid_location'
+        'keterangan',
+        'latitude',
+        'longitude',
+        'is_valid_location',
+        'foto_path',
     ];
 
     public function user()
         {
             return $this->belongsTo(User::class);
+        }
+
+    public function pengajuantidakhadir()
+        {
+            return $this->belongsTo(PengajuanTidakHadir::class);
         }
 
     public function getWaktuAbsenAttribute($value)

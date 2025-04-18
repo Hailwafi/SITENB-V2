@@ -13,6 +13,7 @@ class PengajuanTidakHadir extends Model
     protected $table = 'pengajuan_tidakhadir';
 
     protected $fillable = [
+        'user_id',
         'nama',
         'jabatan',
         'tanggal_pembuatan',
@@ -22,5 +23,16 @@ class PengajuanTidakHadir extends Model
         'catatan',
         'dokumen',
         'status',
+        'alasan_penolakan',
     ];
+
+    public function user()
+        {
+            return $this->belongsTo(User::class);
+        }
+
+    public function absen()
+        {
+            return $this->belongsTo(Absen::class);
+        }
 }

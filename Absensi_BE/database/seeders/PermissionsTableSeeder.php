@@ -42,21 +42,22 @@ class PermissionsTableSeeder extends Seeder
         Permission::create(['name' => 'categories.delete', 'guard_name' => 'api']);
         
         //permission for absens
-        Permission::create(['name' => 'absens.absen', 'guard_name' => 'api']);
+        Permission::create(['name' => 'absens.absen', 'guard_name'        => 'api']);
 
         //permission for pengajuan cuti/izin/lembur
-        Permission::create(['name' => 'pengajuan_tidakhadir.index', 'guard_name' => 'api']);
-        Permission::create(['name' => 'pengajuan_tidakhadir.show', 'guard_name' => 'api']);
-        Permission::create(['name' => 'pengajuan_tidakhadir.store', 'guard_name' => 'api']);
-        Permission::create(['name' => 'pengajuan_tidakhadir.delete', 'guard_name' => 'api']);
+        Permission::create(['name' => 'pengajuan_tidakhadir.index', 'guard_name'      => 'api']);
+        Permission::create(['name' => 'pengajuan_tidakhadir.show', 'guard_name'       => 'api']);
+        Permission::create(['name' => 'pengajuan_tidakhadir.store', 'guard_name'      => 'api']);
+        Permission::create(['name' => 'pengajuan_tidakhadir.delete', 'guard_name'     => 'api']);
+        Permission::create(['name' => 'pengajuan_tidakhadir.verifikasi', 'guard_name' => 'api']);
 
         //permission for izin/sakits
-        Permission::create(['name' => 'izin_sakits.store', 'guard_name'  => 'api']);
+        Permission::create(['name' => 'izin_sakits.store', 'guard_name'            => 'api']);
         Permission::create(['name' => 'izin_sakits.getMonthlyCounts', 'guard_name' => 'api']);
         
         //permission for profiles
         Permission::create(['name' => 'profiles.store', 'guard_name'  => 'api']);
-        Permission::create(['name' => 'profiles.show', 'guard_name' => 'api']);
+        Permission::create(['name' => 'profiles.show', 'guard_name'   => 'api']);
         Permission::create(['name' => 'profiles.update', 'guard_name' => 'api']);            
         
     }

@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB; // ← tambahkan ini!
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -14,6 +14,7 @@ return new class extends Migration
     {
         Schema::create('pengajuan_tidakhadir', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('user_id');
             $table->string('nama');
             $table->string('jabatan');
             $table->string('tanggal_pembuatan')->nullable();
@@ -21,8 +22,9 @@ return new class extends Migration
             $table->enum('jenis_pengajuan', ['cuti', 'izin', 'lembur', 'semua']);
             $table->enum('jenis_cuti', ['tahunan', 'melahirkan', 'duka', 'lainnya'])->nullable();
             $table->text('catatan')->nullable();
-            $table->string('dokumen')->nullable(); // Menyimpan path file
-            $table->enum('status', ['proses', 'disetujui', 'ditolak'])->default('proses');
+            $table->string('dokumen')->nullable();
+            $table->enum('status', ['proses', 'izin', 'cuti', 'diterima', 'ditolak', 'melewati_batas_waktu'])->default('proses');
+            $table->string('alasan_penolakan')->nullable(); // jika ditolak
             $table->timestamps();
         });
     }
