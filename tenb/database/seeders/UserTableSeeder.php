@@ -66,6 +66,11 @@ class UserTableSeeder extends Seeder
             'publiks.assign-publik',
             'publiks.get-new-publik-publiks',
             'publiks.search',
+            'absens.absen',
+            'pengajuan_tidakhadir.index',
+            'pengajuan_tidakhadir.show',
+            'pengajuan_tidakhadir.store',
+            'pengajuan_tidakhadir.delete',
             // tambahkan permission lainnya
         ])->get();
         $role->syncPermissions($permissions);
@@ -113,6 +118,11 @@ class UserTableSeeder extends Seeder
             'publiks.update-status',
             'publiks.search',
             'proof_of_works.create',
+            'absens.absen',
+            'pengajuan_tidakhadir.index',
+            'pengajuan_tidakhadir.show',
+            'pengajuan_tidakhadir.store',
+            'pengajuan_tidakhadir.delete',
         ])->get();
         $role->syncPermissions($permissions);
 

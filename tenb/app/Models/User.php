@@ -65,4 +65,14 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(Publik::class, 'user_id', 'id');
     }
+
+    public function absens()
+    {
+        return $this->hasMany(Absen::class);
+    }
+
+    public function pengajuanTidakHadir()
+    {
+        return $this->hasMany(PengajuanTidakHadir::class);
+    }
 }

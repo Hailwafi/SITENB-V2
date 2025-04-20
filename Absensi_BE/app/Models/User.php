@@ -51,20 +51,19 @@ class User extends Authenticatable implements JWTSubject
     }
 
     public function absens()
-{
-    return $this->hasMany(Absen::class);
-}
+    {
+        return $this->hasMany(Absen::class);
+    }
 
-public function pengajuanTidakHadir()
-{
-    return $this->hasMany(PengajuanTidakHadir::class);
-}
-
+    public function pengajuanTidakHadir()
+    {
+        return $this->hasMany(PengajuanTidakHadir::class);
+    }
 
     public function profile()
-{
-    return $this->hasOne(Profile::class, 'user_id');
-}
+    {
+        return $this->hasOne(Profile::class, 'user_id');
+    }
 
 
     public function getPermissionArray() {

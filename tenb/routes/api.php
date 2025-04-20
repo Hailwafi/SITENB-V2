@@ -99,6 +99,24 @@ use Illuminate\Support\Facades\Route;
             Route::get('search/publik-tickets', [App\Http\Controllers\PublikController::class, 'search'])
             ->middleware('permission:publiks.search');
 
+         // statistik absensi 
+            Route::get('/statistik-absensi', [App\Http\Controllers\Api\Admin\DashboardController::class, 'statistikAbsensi'])
+            ->middleware('auth:api');
+
+        // detail absensi
+            Route::get('/detail-absensi/{id}', [App\Http\Controllers\Api\Admin\DashboardController::class, 'detail'])
+            ->middleware('auth:api');
+
+        // melihat hasil pengajuan cuti/izin
+            Route::get('/pengajuan', [App\Http\Controllers\Api\Admin\DashboardController::class, 'getPengajuan'])
+            ->middleware('auth:api');
+
+        // detail pengajuan cuti/izin
+            Route::get('/pengajuan/{id}/detail', [App\Http\Controllers\Api\Admin\DashboardController::class, 'showDetail'])
+            ->middleware('auth:api');
+
+        // vertifikasi pengajuan dari admin
+            Route::post('/pengajuan/{id}/verifikasi', [App\Http\Controllers\PengajuanTidakHadirController::class, 'verifikasi']);  
 
         // dashboard
             Route::get('/dashboard', App\Http\Controllers\Api\Admin\DashboardController::class);
@@ -205,6 +223,25 @@ use Illuminate\Support\Facades\Route;
             Route::get('search/publik-tickets', [App\Http\Controllers\PublikController::class, 'search'])
             ->middleware('permission:publiks.search');
 
+        // statistik absensi 
+            Route::get('/statistik-absensi', [App\Http\Controllers\Api\Admin\DashboardController::class, 'statistikAbsensi'])
+            ->middleware('auth:api');
+
+        // detail absensi
+            Route::get('/detail-absensi/{id}', [App\Http\Controllers\Api\Admin\DashboardController::class, 'detail'])
+            ->middleware('auth:api');
+
+        // melihat hasil pengajuan cuti/izin
+            Route::get('/pengajuan', [App\Http\Controllers\Api\Admin\DashboardController::class, 'getPengajuan'])
+            ->middleware('auth:api');
+
+        // detail pengajuan cuti/izin
+            Route::get('/pengajuan/{id}/detail', [App\Http\Controllers\Api\Admin\DashboardController::class, 'showDetail'])
+            ->middleware('auth:api');
+
+        // vertifikasi pengajuan dari admin
+            Route::post('/pengajuan/{id}/verifikasi', [App\Http\Controllers\PengajuanTidakHadirController::class, 'verifikasi']);  
+
         // dashboard
             Route::get('/dashboard', App\Http\Controllers\Api\Admin\DashboardController::class);
 
@@ -294,9 +331,10 @@ use Illuminate\Support\Facades\Route;
             Route::get('search/tickets', [App\Http\Controllers\TicketController::class, 'search']);
             Route::get('search/publik-tickets', [App\Http\Controllers\PublikController::class, 'search']);
 
-      // download unggah file tiket pegawai & publik
-      Route::get('/view-or-download-file/{ticketId}', [App\Http\Controllers\TicketController::class, 'viewOrDownloadFile']);
-      Route::get('/view-or-download-file-publik/{publikId}', [App\Http\Controllers\PublikController::class, 'downloadFilePublik']);
+        // download unggah file tiket pegawai & publik
+            Route::get('/view-or-download-file/{ticketId}', [App\Http\Controllers\TicketController::class, 'viewOrDownloadFile']);
+            Route::get('/view-or-download-file-publik/{publikId}', [App\Http\Controllers\PublikController::class, 'downloadFilePublik']);
+
         //users
             Route::apiResource('/users', App\Http\Controllers\Api\Admin\UserController::class)
             ->middleware('permission:users.create');
@@ -318,7 +356,28 @@ use Illuminate\Support\Facades\Route;
             ->middleware('permission:proof_of_works.create');
 
         // bukti pengerjaan ticket publik
-        Route::post('/publiks/{publik}/proof-of-work', [App\Http\Controllers\ProofOfWorkController::class, 'store'])
-        ->middleware('permission:proof_of_works.create');
+            Route::post('/publiks/{publik}/proof-of-work', [App\Http\Controllers\ProofOfWorkController::class, 'store'])
+            ->middleware('permission:proof_of_works.create');
+
+        // dashboard staff
+            Route::get('/dashboard', [App\Http\Controllers\Api\Staff\DashboardStaffController::class, 'index']);
+            Route::get('/statistik-absensi', [App\Http\Controllers\Api\Staff\DashboardStaffController::class, 'statistikAbsensi'])
+            ->middleware('auth:api');
+            Route::get('/detail-absensi/{id}', [App\Http\Controllers\Api\Staff\DashboardStaffController::class, 'detail'])
+            ->middleware('auth:api');
+            Route::get('/pengajuan', [App\Http\Controllers\Api\Staff\DashboardStaffController::class, 'getPengajuan'])
+            ->middleware('auth:api');
+            Route::get('/pengajuan/{id}/detail', [App\Http\Controllers\Api\Staff\DashboardStaffController::class, 'showDetail'])
+            ->middleware('auth:api');
+
+        // absen
+            Route::post('/absen', [App\Http\Controllers\AbsenController::class, 'absen']);
+
+         // pengajuan cuti/izin/lembur
+            Route::get('/lihat', [App\Http\Controllers\PengajuanTidakHadirController::class, 'index']);
+            Route::get('/melihat/{id}', [App\Http\Controllers\PengajuanTidakHadirController::class, 'show']);
+            Route::post('/membuat', [App\Http\Controllers\PengajuanTidakHadirController::class, 'store']);
+            Route::post('/mengubah/{id}', [App\Http\Controllers\PengajuanTidakHadirController::class, 'update']);
+            Route::delete('/menghapus/{id}', [App\Http\Controllers\PengajuanTidakHadirController::class, 'destroy']);
     });
 });

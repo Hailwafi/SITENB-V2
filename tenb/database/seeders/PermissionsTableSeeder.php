@@ -58,8 +58,17 @@ class PermissionsTableSeeder extends Seeder
         Permission::create(['name' => 'publiks.get-new-publik-publiks', 'guard_name'    => 'api']);
         Permission::create(['name' => 'publiks.search', 'guard_name'                    => 'api']);
 
-
         //permission for proof of works
         Permission::create(['name' => 'proof_of_works.create', 'guard_name' => 'api']);
+
+         //permission for absens
+         Permission::create(['name' => 'absens.absen', 'guard_name'        => 'api']);
+
+         //permission for pengajuan cuti/izin/lembur
+         Permission::create(['name' => 'pengajuan_tidakhadir.index', 'guard_name'      => 'api']);
+         Permission::create(['name' => 'pengajuan_tidakhadir.show', 'guard_name'       => 'api']);
+         Permission::create(['name' => 'pengajuan_tidakhadir.store', 'guard_name'      => 'api']);
+         Permission::create(['name' => 'pengajuan_tidakhadir.delete', 'guard_name'     => 'api']);
+         Permission::create(['name' => 'pengajuan_tidakhadir.verifikasi', 'guard_name' => 'api']);
     }
 }
