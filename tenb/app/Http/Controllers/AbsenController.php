@@ -16,8 +16,9 @@ class AbsenController extends Controller
 
     public function absen(Request $request)
     {
+        $user = $request->user(); // Ambil user dari bearer token
+
         $request->validate([
-            'user_id'   => 'required|exists:users,id',
             'status'    => 'required|in:masuk,keluar',
             'latitude'  => 'required|numeric',
             'longitude' => 'required|numeric',
@@ -29,114 +30,98 @@ class AbsenController extends Controller
         $currentHour = $now->format('H:i:s');
 
         // Validasi lokasi
-            if (!$this->isWithinAllowedRadius($request->latitude, $request->longitude)) 
-                {
-                    return response()->json([
-                        'message' => 'Anda berada di luar area absen yang diizinkan!',
-                        'status'  => 'failed'
-                    ], 403);
-                }
+        if (!$this->isWithinAllowedRadius($request->latitude, $request->longitude)) {
+            return response()->json([
+                'message' => 'Anda berada di luar area absen yang diizinkan!',
+                'status'  => 'failed'
+            ], 403);
+        }
 
         // Validasi jam absen masuk (07:00-16:00)
-            if ($request->status === 'masuk' && ($currentHour < '07:00:00' || $currentHour >= '16:00:00')) 
-                {
-                    return response()->json([
-                        'message' => 'Absen masuk hanya bisa dilakukan antara pukul 07:00-16:00',
-                        'status'  => 'failed'
-                    ], 403);
-                }
+        if ($request->status === 'masuk' && ($currentHour < '07:00:00' || $currentHour >= '16:00:00')) {
+            return response()->json([
+                'message' => 'Absen masuk hanya bisa dilakukan antara pukul 07:00-16:00',
+                'status'  => 'failed'
+            ], 403);
+        }
 
         // Cek absen hari ini
-            $existingAbsen = Absen::where('user_id', $request->user_id)
-                ->whereDate('waktu_absen', $today)
-                ->where('status', $request->status)
-                ->first();
+        $existingAbsen = Absen::where('user_id', $user->id)
+            ->whereDate('waktu_absen', $today)
+            ->where('status', $request->status)
+            ->first();
 
-        if ($existingAbsen) 
-            {
-                return response()->json([
-                    'message' => 'Anda sudah absen ' . $request->status . ' hari ini!',
-                    'status'  => 'failed'
-                ], 400);
-            }
+        if ($existingAbsen) {
+            return response()->json([
+                'message' => 'Anda sudah absen ' . $request->status . ' hari ini!',
+                'status'  => 'failed'
+            ], 400);
+        }
 
         // Handle pengambilan foto
-            $fotoPath = $request->file('foto')->store('profile_photos', 'public');
-            $fotoUrl = Storage::url($fotoPath);
+        $fotoPath = $request->file('foto')->store('profile_photos', 'public');
+        $fotoUrl = Storage::url($fotoPath);
 
         // Tentukan status dan keterangan
-            $status = $request->status;
-            $keterangan = null;
-            $pengajuanLembur = null;
+        $status = $request->status;
+        $keterangan = null;
 
-        if ($status === 'masuk') 
-            {
-                $jamBatasTepatWaktu = Carbon::createFromTime(8, 0, 0, 'Asia/Jakarta');
-                $jamBatasMasuk = Carbon::createFromTime(16, 0, 0, 'Asia/Jakarta');
-                
-                if ($now->greaterThan($jamBatasMasuk)) 
-                    {
-                        return response()->json([
-                            'message' => 'Absen masuk sudah ditutup, silakan absen masuk besok',
-                            'status'  => 'failed'
-                        ], 403);
-                    }
+        if ($status === 'masuk') {
+            $jamBatasTepatWaktu = Carbon::createFromTime(8, 0, 0, 'Asia/Jakarta');
+            $jamBatasMasuk = Carbon::createFromTime(16, 0, 0, 'Asia/Jakarta');
 
-                $keterangan = $now->lessThanOrEqualTo($jamBatasTepatWaktu) ? 'Tepat Waktu' : 'Terlambat';
-            } 
-        elseif ($status === 'keluar') 
-        {
-                $jamMulaiKeluar = Carbon::createFromTime(16, 0, 0, 'Asia/Jakarta');
-                $jamTutupKeluar = Carbon::createFromTime(18, 0, 0, 'Asia/Jakarta');
-            
-            
-                // Validasi jam absen keluar
-                if ($now->lessThan($jamMulaiKeluar)) 
-                    {
-                        return response()->json([
-                            'message' => 'Absen keluar hanya bisa dilakukan mulai pukul 16:00',
-                            'status'  => 'failed'
-                        ], 403);
-                    }
-            
-                // Tentukan keterangan absen
-                // Lewat jam 18:00
-            if ($now->greaterThan($jamTutupKeluar)) 
-                {
-                    // Frontend harus kirim "lembur" jika user pilih "ya"
-                        if ($request->has('lembur') && $request->lembur === 'ya') 
-                        {
-                            $status = 'lembur';
-                            $keterangan = 'Lembur Setelah Jam Kerja';
-                        } else {
-                            $keterangan = 'Keluar Normal (Lewat Jam)';
-                        }
-                        } else {
-                            $keterangan = 'Keluar Normal';
-                        }
-        }
-        
-            // Simpan data absen
-                $absen = Absen::create([
-                    'user_id'           => $request->user_id,
-                    'status'            => $status,
-                    'waktu_absen'       => $now,
-                    'keterangan'        => $keterangan,
-                    'latitude'          => $request->latitude,
-                    'longitude'         => $request->longitude,
-                    'is_valid_location' => true,
-                    'foto_path'         => $fotoPath,
-                ]);
-        
+            if ($now->greaterThan($jamBatasMasuk)) {
                 return response()->json([
-                    'message'        => 'Absen keluar berhasil!',
-                    'status'         => 'success',
-                    'data'           => [
-                        'absen'      => $absen,
-                        'foto_url'   => asset($fotoUrl),
-                        'keterangan' => $keterangan
-                    ]
-                ], 201);
+                    'message' => 'Absen masuk sudah ditutup, silakan absen masuk besok',
+                    'status'  => 'failed'
+                ], 403);
+            }
+
+            $keterangan = $now->lessThanOrEqualTo($jamBatasTepatWaktu) ? 'Tepat Waktu' : 'Terlambat';
+        } elseif ($status === 'keluar') {
+            $jamMulaiKeluar = Carbon::createFromTime(16, 0, 0, 'Asia/Jakarta');
+            $jamTutupKeluar = Carbon::createFromTime(18, 0, 0, 'Asia/Jakarta');
+
+            if ($now->lessThan($jamMulaiKeluar)) {
+                return response()->json([
+                    'message' => 'Absen keluar hanya bisa dilakukan mulai pukul 16:00',
+                    'status'  => 'failed'
+                ], 403);
+            }
+
+            if ($now->greaterThan($jamTutupKeluar)) {
+                if ($request->has('lembur') && $request->lembur === 'ya') {
+                    $status = 'lembur';
+                    $keterangan = 'Lembur Setelah Jam Kerja';
+                } else {
+                    $keterangan = 'Keluar Normal (Lewat Jam)';
+                }
+            } else {
+                $keterangan = 'Keluar Normal';
+            }
+        }
+
+        // Simpan data absen
+        $absen = Absen::create([
+            'user_id'           => $user->id,
+            'status'            => $status,
+            'waktu_absen'       => $now,
+            'keterangan'        => $keterangan,
+            'latitude'          => $request->latitude,
+            'longitude'         => $request->longitude,
+            'is_valid_location' => true,
+            'foto_path'         => $fotoPath,
+        ]);
+
+        return response()->json([
+            'message'        => 'Absen ' . $status . ' berhasil!',
+            'status'         => 'success true',
+            'data'           => [
+                'absen'      => $absen,
+                'foto_url'   => asset($fotoUrl),
+                'keterangan' => $keterangan
+            ]
+        ], 201);
     }
 
     private function isWithinAllowedRadius($lat, $lon)
