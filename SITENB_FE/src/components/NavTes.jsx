@@ -32,15 +32,16 @@ export default function NavTes({ isOpen, toggleNav }) {
   const dropdownItems = {
     admin: [
       { name: "Data Absen", href: "/Dashboard/DataAb", icon: FaChartBar },
-      { name: "Data Izin/Sakit", href: "/Admin/Data_Izin_Sakit", icon: FaAlignLeft },
+      { name: "Data Izin/Sakit", href: "/Dashboard/DataSI", icon: FaAlignLeft },
     ],
     kepala_subbag: [
       { name: "Laporan Bulanan", href: "/Leader/LaporanBulanan", icon: FaFileExport },
       { name: "Evaluasi Kinerja", href: "/Leader/EvaluasiKinerja", icon: FaFileExport },
     ],
     staff: [
-      { name: "Jadwal Kerja", href: "/Staff/JadwalKerja", icon: FaFileExport },
-      { name: "Presensi", href: "/Staff/Presensi", icon: FaFileExport },
+      { name: "Absensi", href: "/Staff/Absen", icon: FaFileExport },
+      { name: "Absensi", href: "/Staff/DataCIL", icon: FaFileExport },
+      { name: "Absensi", href: "/Staff/PresentaseAB", icon: FaFileExport },
     ],
   };
   const dropdownItemsAK = {

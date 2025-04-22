@@ -29,7 +29,7 @@ class AbsenController extends Controller
         $currentHour = $now->format('H:i:s');
 
         // Validasi lokasi
-            if (!$this->isWithinAllowedRadius($request->latitude, $request->longitude)) 
+            if (!$this->isWithinAllowedRadius($request->latitude, $request->longitude))
                 {
                     return response()->json([
                         'message' => 'Anda berada di luar area absen yang diizinkan!',
@@ -38,7 +38,7 @@ class AbsenController extends Controller
                 }
 
         // Validasi jam absen masuk (07:00-16:00)
-            if ($request->status === 'masuk' && ($currentHour < '07:00:00' || $currentHour >= '16:00:00')) 
+            if ($request->status === 'masuk' && ($currentHour < '07:00:00' || $currentHour >= '16:00:00'))
                 {
                     return response()->json([
                         'message' => 'Absen masuk hanya bisa dilakukan antara pukul 07:00-16:00',
@@ -52,7 +52,7 @@ class AbsenController extends Controller
                 ->where('status', $request->status)
                 ->first();
 
-        if ($existingAbsen) 
+        if ($existingAbsen)
             {
                 return response()->json([
                     'message' => 'Anda sudah absen ' . $request->status . ' hari ini!',
@@ -69,12 +69,12 @@ class AbsenController extends Controller
             $keterangan = null;
             $pengajuanLembur = null;
 
-        if ($status === 'masuk') 
+        if ($status === 'masuk')
             {
                 $jamBatasTepatWaktu = Carbon::createFromTime(8, 0, 0, 'Asia/Jakarta');
                 $jamBatasMasuk = Carbon::createFromTime(16, 0, 0, 'Asia/Jakarta');
-                
-                if ($now->greaterThan($jamBatasMasuk)) 
+
+                if ($now->greaterThan($jamBatasMasuk))
                     {
                         return response()->json([
                             'message' => 'Absen masuk sudah ditutup, silakan absen masuk besok',
@@ -83,28 +83,28 @@ class AbsenController extends Controller
                     }
 
                 $keterangan = $now->lessThanOrEqualTo($jamBatasTepatWaktu) ? 'Tepat Waktu' : 'Terlambat';
-            } 
-        elseif ($status === 'keluar') 
+            }
+        elseif ($status === 'keluar')
         {
                 $jamMulaiKeluar = Carbon::createFromTime(16, 0, 0, 'Asia/Jakarta');
                 $jamTutupKeluar = Carbon::createFromTime(18, 0, 0, 'Asia/Jakarta');
-            
-            
+
+
                 // Validasi jam absen keluar
-                if ($now->lessThan($jamMulaiKeluar)) 
+                if ($now->lessThan($jamMulaiKeluar))
                     {
                         return response()->json([
                             'message' => 'Absen keluar hanya bisa dilakukan mulai pukul 16:00',
                             'status'  => 'failed'
                         ], 403);
                     }
-            
+
                 // Tentukan keterangan absen
                 // Lewat jam 18:00
-            if ($now->greaterThan($jamTutupKeluar)) 
+            if ($now->greaterThan($jamTutupKeluar))
                 {
                     // Frontend harus kirim "lembur" jika user pilih "ya"
-                        if ($request->has('lembur') && $request->lembur === 'ya') 
+                        if ($request->has('lembur') && $request->lembur === 'ya')
                         {
                             $status = 'lembur';
                             $keterangan = 'Lembur Setelah Jam Kerja';
@@ -115,7 +115,7 @@ class AbsenController extends Controller
                             $keterangan = 'Keluar Normal';
                         }
         }
-        
+
             // Simpan data absen
                 $absen = Absen::create([
                     'user_id'           => $request->user_id,
@@ -127,7 +127,7 @@ class AbsenController extends Controller
                     'is_valid_location' => true,
                     'foto_path'         => $fotoPath,
                 ]);
-        
+
                 return response()->json([
                     'message'        => 'Absen keluar berhasil!',
                     'status'         => 'success',
@@ -146,8 +146,8 @@ class AbsenController extends Controller
         $dLat = deg2rad($lat - $this->allowedLatitude);
         $dLon = deg2rad($lon - $this->allowedLongitude);
 
-        $a = sin($dLat/2) * sin($dLat/2) + 
-             cos(deg2rad($this->allowedLatitude)) * cos(deg2rad($lat)) * 
+        $a = sin($dLat/2) * sin($dLat/2) +
+             cos(deg2rad($this->allowedLatitude)) * cos(deg2rad($lat)) *
              sin($dLon/2) * sin($dLon/2);
 
         $c = 2 * atan2(sqrt($a), sqrt(1-$a));

@@ -31,6 +31,10 @@ const Staff = lazy(() => import('./pages/Dashboard/Staff/Index'));
 const TaskPw = lazy(() => import('./pages/Dashboard/Staff/TaskPw'));
 const TaskPb = lazy(() => import('./pages/Dashboard/Staff/TaskPb'));
 const TaskList = lazy(() => import('./pages/Dashboard/Staff/TaskList'));
+const Absen = lazy(() => import('./pages/Dashboard/Staff/Absen'));
+const PengajuanCIL = lazy(() => import('./pages/Dashboard/Staff/PengajuanCIL'));
+const DataCIL = lazy(() => import('./pages/Dashboard/Staff/DataCIL'));
+const PersentaseAB = lazy(() => import('./pages/Dashboard/Staff/PersentaseAB'));
 
 const TiketPb = lazy(() => import('./pages/TiketPb'));
 const TiketPw = lazy(() => import('./pages/TiketPw'));
@@ -42,6 +46,8 @@ const StaffList = lazy(() => import('./pages/Dashboard/StaffList'));
 const StaffDetail = lazy(() => import('./pages/Dashboard/StaffDetail'));
 const DataAb = lazy(() => import('./pages/Dashboard/DataAb'));
 const DetailAbPg = lazy(() => import('./pages/Dashboard/DetailAbPg'));
+const DataSI = lazy(() => import('./pages/Dashboard/DataSI'));
+const DetailSI = lazy(() => import('./pages/Dashboard/DetailSI'));
 
 const WorkStaff = lazy(() => import('./pages/Dashboard/Admin/WorkStaff'));
 const ListUser = lazy(() => import('./pages/Dashboard/Admin/ListUser'));
@@ -108,6 +114,8 @@ const AdminLayout = withAuthenticationAdmin(() => {
             <Route path="/StaffList" element={<StaffList />} />
             <Route path="/StaffDetail/:id" element={<StaffDetail />} />
             <Route path="/DataAb" element={<DataAb />} />
+            <Route path="/DataSI" element={<DataSI />} />
+            <Route path="/DetailSI" element={<DetailSI />} />
             <Route path="/DetailAbPg" element={<DetailAbPg />} />
           </Routes>
         </Suspense>
@@ -175,8 +183,12 @@ const StaffLayout = withAuthenticationStaff(() => {
           <Routes>
           <Route path="/" element={<Staff />} />
         <Route path="/TaskPw" element={<TaskPw />} />
+        <Route path="/Absen" element={<Absen />} />
         <Route path="/TaskPb" element={<TaskPb />} />
         <Route path="/TaskList" element={<TaskList />} />
+        <Route path="/PengajuanCIL" element={<PengajuanCIL />} />
+        <Route path="/DataCIL" element={<DataCIL />} />
+        <Route path="/PersentaseAB" element={<PersentaseAB />} />
           </Routes>
         </Suspense>
       </div>
