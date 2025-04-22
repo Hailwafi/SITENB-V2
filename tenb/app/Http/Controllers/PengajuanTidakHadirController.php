@@ -30,77 +30,83 @@ class PengajuanTidakHadirController extends Controller
             return response()->json($pengajuan);
         }
 
-        public function store(Request $request)
-            {
-                // Aturan validasi
-                    $rules = [
-                        'user_id'           => 'required|exists:users,id',
-                        'nama'              => 'required|string|max:255',
-                        'jabatan'           => 'required|string|max:255',
-                        'tanggal_pengajuan' => ['required', 'regex:/^\d{2}-\d{2}-\d{4}\s+s\.d\s+\d{2}-\d{2}-\d{4}$/'],
-                        'jenis_pengajuan'   => ['required', Rule::in(['cuti', 'izin', 'lembur'])],
-                        'catatan'           => 'nullable|string|max:500',
-                        'dokumen'           => 'required|file|mimetypes:application/pdf,image/jpeg,image/png,image/jpg|max:2048',
-                    ];
-            
-                // Aturan tambahan untuk tipe cuti
-                if ($request->jenis_pengajuan === 'cuti') 
-                    {
-                        $rules['jenis_cuti'] = ['required', Rule::in(['tahunan', 'melahirkan', 'duka', 'lainnya'])];
-                    } else {
-                        $rules['jenis_cuti'] = 'prohibited';
-                    }
-                
-                // Validasi request
-                    $request->validate($rules);
-            
-                // Ekstrak tanggal dari 'tanggal_pengajuan'
-                    preg_match('/\d{2}-\d{2}-\d{4}/', $request->tanggal_pengajuan, $startDate);
-                    preg_match('/\d{2}-\d{2}-\d{4}$/', $request->tanggal_pengajuan, $endDate);
-            
-                // Buat instans Carbon untuk tanggal
-                    $startSubmissionDate = Carbon::createFromFormat('d-m-Y', trim($startDate[0]));
-                    $endSubmissionDate = Carbon::createFromFormat('d-m-Y', trim($endDate[0]));
-                    $today = Carbon::today();
-            
-                // Validasi tanggal untuk pengajuan
-                    if (in_array($request->jenis_pengajuan, ['cuti', 'izin'])) 
-                        {
-                            if ($startSubmissionDate->isToday() || $startSubmissionDate->isYesterday() || $endSubmissionDate->isBefore($today)) 
-                                {
-                                    return response()->json(['message' => 'Tanggal pengajuan untuk cuti atau izin tidak dapat dilakukan di hari ini atau hari kemarin.'], 422);
-                                }
-                        }
-            
-                // Proses dokumen
-                    $dokumemek = $request->hasFile('dokumen') 
-                    ? $request->file('dokumen')->store('kontol', 'public') 
-                    : null;
+    public function store(Request $request)
+        {
+            $user = auth()->user(); // Ambil user dari token
 
-                    if ($request->jenis_pengajuan === 'lembur') 
-                        {
-                            Absen::where('user_id', $request->user_id)
-                                ->whereDate('waktu_absen', Carbon::today())
-                                ->where('status', 'keluar')
-                                ->update(['status' => 'lembur', 'keterangan' => 'Lembur Setelah Jam Kerja']);
-                        }
+            // Validasi awal
+            $rules = [
+                'nama'              => 'required|string|max:255',
+                'jabatan'           => 'required|string|max:255',
+                'tanggal_pengajuan' => ['required', 'regex:/^\d{2}-\d{2}-\d{4}\s+s\.d\s+\d{2}-\d{2}-\d{4}$/'],
+                'jenis_pengajuan'   => ['required', Rule::in(['cuti', 'izin', 'lembur'])],
+                'catatan'           => 'nullable|string|max:500',
+                'dokumen'           => 'required|file|mimetypes:application/pdf,image/jpeg,image/png,image/jpg|max:2048',
+            ];
 
-                // Proses penyimpanan data
-                    $pengajuan = PengajuanTidakHadir::create([
-                        'user_id'           => $request->user_id,
-                        'tanggal_pembuatan' => Carbon::now()->format('Y-m-d'),
-                        'nama'              => $request->nama,
-                        'jabatan'           => $request->jabatan,
-                        'tanggal_pengajuan' => $request->tanggal_pengajuan,
-                        'jenis_pengajuan'   => $request->jenis_pengajuan,
-                        'jenis_cuti'        => $request->jenis_cuti ?? null,
-                        'catatan'           => $request->catatan,
-                        'dokumen'           => asset('storage/' . $dokumemek),
-                        'status'            => 'proses',
-                    ]);
-            
-                    return new PengajuanResource(true, 'Pengajuan Berhasil dibuat', $pengajuan);
+            if ($request->jenis_pengajuan === 'cuti') {
+                $rules['jenis_cuti'] = ['required', Rule::in(['tahunan', 'melahirkan', 'duka', 'lainnya'])];
+            } else {
+                $rules['jenis_cuti'] = 'prohibited';
             }
+
+            $request->validate($rules);
+
+            // Ekstrak tanggal
+            preg_match('/\d{2}-\d{2}-\d{4}/', $request->tanggal_pengajuan, $startDate);
+            preg_match('/\d{2}-\d{2}-\d{4}$/', $request->tanggal_pengajuan, $endDate);
+
+            $startSubmissionDate = Carbon::createFromFormat('d-m-Y', trim($startDate[0]));
+            $endSubmissionDate = Carbon::createFromFormat('d-m-Y', trim($endDate[0]));
+            $today = Carbon::today();
+
+            // Cek batasan tanggal cuti/izin
+            if (in_array($request->jenis_pengajuan, ['cuti', 'izin'])) {
+                if ($startSubmissionDate->isToday() || $startSubmissionDate->isYesterday() || $endSubmissionDate->isBefore($today)) {
+                    return response()->json([
+                        'message' => 'Tanggal pengajuan untuk cuti atau izin tidak dapat dilakukan di hari ini atau hari kemarin.'
+                    ], 422);
+                }
+            }
+
+            // ✅ Cek apakah user sudah membuat pengajuan hari ini
+            $existing = PengajuanTidakHadir::where('user_id', $user->id)
+                ->whereDate('created_at', $today)
+                ->exists();
+
+            if ($existing) {
+                return response()->json([
+                    'message' => 'Pengajuan hanya dapat dilakukan sekali dalam sehari.',
+                ], 422);
+            }
+
+            // Simpan dokumen
+            $dokumenPath = $request->file('dokumen')->store('kontol', 'public');
+
+            // Jika lembur, update absen keluar hari ini
+            if ($request->jenis_pengajuan === 'lembur') {
+                Absen::where('user_id', $user->id)
+                    ->whereDate('waktu_absen', Carbon::today())
+                    ->where('status', 'keluar')
+                    ->update(['status' => 'lembur', 'keterangan' => 'Lembur Setelah Jam Kerja']);
+            }
+
+            // Simpan pengajuan
+            $pengajuan = PengajuanTidakHadir::create([
+                'user_id'           => $user->id,
+                'tanggal_pembuatan' => Carbon::now()->format('Y-m-d'),
+                'nama'              => $request->nama,
+                'jabatan'           => $request->jabatan,
+                'tanggal_pengajuan' => $request->tanggal_pengajuan,
+                'jenis_pengajuan'   => $request->jenis_pengajuan,
+                'jenis_cuti'        => $request->jenis_cuti ?? null,
+                'catatan'           => $request->catatan,
+                'dokumen'           => asset('storage/' . $dokumenPath),
+                'status'            => 'proses',
+            ]);
+
+            return new PengajuanResource(true, 'Pengajuan berhasil dibuat', $pengajuan);
+        }
 
     public function update(Request $request, $id)
             {
