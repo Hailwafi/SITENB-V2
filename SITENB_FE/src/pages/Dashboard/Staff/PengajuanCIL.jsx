@@ -5,8 +5,10 @@ export default function PengajuanCIL() {
   const [formData, setFormData] = useState({
     nama: "",
     jabatan: "",
-    tanggal: new Date().toISOString().split("T")[0],
-    jenis: "Lembur",
+    tanggal_dari: new Date().toISOString().split("T")[0],
+    tanggal_sampai: new Date().toISOString().split("T")[0],
+    jenis_pengajuan: "lembur",
+    jenis_cuti: "",
     catatan: "",
     dokumen: null,
   });
@@ -25,27 +27,62 @@ export default function PengajuanCIL() {
     }
   };
 
+  const formatTanggal = (tanggal) => {
+    const tgl = new Date(tanggal);
+    const day = String(tgl.getDate()).padStart(2, "0");
+    const month = String(tgl.getMonth() + 1).padStart(2, "0");
+    const year = tgl.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
+    const tanggal_pengajuan = `${formatTanggal(formData.tanggal_dari)} s.d ${formatTanggal(formData.tanggal_sampai)}`;
+
     const data = new FormData();
-    for (const key in formData) {
-      data.append(key, formData[key]);
+    data.append("nama", formData.nama);
+    data.append("jabatan", formData.jabatan);
+    data.append("tanggal_pengajuan", tanggal_pengajuan);
+    data.append("jenis_pengajuan", formData.jenis_pengajuan);
+    if (formData.jenis_pengajuan === "cuti") {
+      data.append("jenis_cuti", formData.jenis_cuti);
     }
+    data.append("catatan", formData.catatan);
+    data.append("dokumen", formData.dokumen);
+
+    console.log("Data yang dikirim ke backend:");
+    console.log({
+      nama: formData.nama,
+      jabatan: formData.jabatan,
+      tanggal_pengajuan,
+      jenis_pengajuan: formData.jenis_pengajuan,
+      jenis_cuti: formData.jenis_pengajuan === "cuti" ? formData.jenis_cuti : undefined,
+      catatan: formData.catatan,
+      dokumen: formData.dokumen?.name,
+    });
 
     try {
-      const response = await axios.post("https://yourapi.com/api/pengajuan", data, {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Token tidak ditemukan. Harap login ulang.");
+        setLoading(false);
+        return;
+      }
+
+      const response = await axios.post("http://127.0.0.1:8000/api/staff/membuat", data, {
         headers: {
           "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
         },
       });
 
       alert("Pengajuan berhasil dikirim!");
-      console.log(response.data);
+      console.log("Response dari server:", response.data);
     } catch (error) {
       console.error(error);
-      alert("Terjadi kesalahan saat mengirim pengajuan.");
+      alert(error.response?.data?.message || "Terjadi kesalahan saat mengirim pengajuan.");
     } finally {
       setLoading(false);
     }
@@ -63,7 +100,6 @@ export default function PengajuanCIL() {
             value={formData.nama}
             onChange={handleChange}
             className="w-full border rounded px-3 py-2 mt-1"
-            placeholder="Masukan Nama"
             required
           />
         </div>
@@ -79,7 +115,7 @@ export default function PengajuanCIL() {
             required
           />
           {previewUrl && (
-            <img src={previewUrl} alt="Preview" className="mt-2 w-32 h-32 object-cover" />
+            <img src={previewUrl} alt="Preview" className="mt-2 w-32 h-32 object-cover rounded" />
           )}
         </div>
 
@@ -91,35 +127,66 @@ export default function PengajuanCIL() {
             value={formData.jabatan}
             onChange={handleChange}
             className="w-full border rounded px-3 py-2 mt-1"
-            placeholder="Pilih Jabatan"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium">Tanggal Pembuatan*</label>
+          <label className="block text-sm font-medium">Tanggal Pengajuan (Dari)*</label>
           <input
-            type="text"
-            value={formData.tanggal}
-            className="w-full border rounded px-3 py-2 mt-1 bg-gray-100"
-            readOnly
+            type="date"
+            name="tanggal_dari"
+            value={formData.tanggal_dari}
+            onChange={handleChange}
+            className="w-full border rounded px-3 py-2 mt-1"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium">Sampai Dengan Tanggal*</label>
+          <input
+            type="date"
+            name="tanggal_sampai"
+            value={formData.tanggal_sampai}
+            onChange={handleChange}
+            className="w-full border rounded px-3 py-2 mt-1"
+            required
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium">Jenis Pengajuan*</label>
           <select
-            name="jenis"
-            value={formData.jenis}
+            name="jenis_pengajuan"
+            value={formData.jenis_pengajuan}
             onChange={handleChange}
             className="w-full border rounded px-3 py-2 mt-1"
             required
           >
-            <option value="Cuti">Cuti</option>
-            <option value="Izin">Izin</option>
-            <option value="Lembur">Lembur</option>
+            <option value="cuti">Cuti</option>
+            <option value="izin">Izin</option>
+            <option value="lembur">Lembur</option>
           </select>
         </div>
+
+        {formData.jenis_pengajuan === "cuti" && (
+          <div>
+            <label className="block text-sm font-medium">Jenis Cuti*</label>
+            <select
+              name="jenis_cuti"
+              value={formData.jenis_cuti}
+              onChange={handleChange}
+              className="w-full border rounded px-3 py-2 mt-1"
+              required
+            >
+              <option value="">-- Pilih Jenis Cuti --</option>
+              <option value="tahunan">Cuti Tahunan</option>
+              <option value="melahirkan">Cuti Melahirkan</option>
+              <option value="duka">Cuti Duka</option>
+            </select>
+          </div>
+        )}
 
         <div className="md:col-span-2">
           <label className="block text-sm font-medium">Catatan*</label>
@@ -146,5 +213,3 @@ export default function PengajuanCIL() {
     </div>
   );
 }
-
-

@@ -51,7 +51,7 @@ class DashboardStaffController extends Controller
 
         $query = User::where('role', '!=', 'admin');
 
-        if ($search) 
+        if ($search)
             {
                 $query->where('username', 'like', '%' . $search . '%');
             }
@@ -67,7 +67,14 @@ class DashboardStaffController extends Controller
             $totalCuti = 0;
             $totalLembur = 0;
 
-        foreach ($users as $user) 
+// Hitung statistik manual
+$totalTepatWaktu = 0;
+$totalTerlambat = 0;
+$totalIzin = 0;
+$totalCuti = 0;
+$totalLembur = 0;
+
+        foreach ($users as $user)
         {
             // Pengajuan tidak hadir (izin, cuti, lembur)
                 $pengajuans = $user->pengajuanTidakHadir()
@@ -75,7 +82,7 @@ class DashboardStaffController extends Controller
                     ->where('status', '!=', 'ditolak')
                     ->get();
 
-            foreach ($pengajuans as $pengajuan) 
+            foreach ($pengajuans as $pengajuan)
             {
                 // Kalau lembur, hanya status_keluar saja yang lembur, status_masuk tetap null
                     $statusMasuk = in_array($pengajuan->jenis_pengajuan, ['izin', 'cuti']) ? $pengajuan->jenis_pengajuan : null;
@@ -111,7 +118,7 @@ class DashboardStaffController extends Controller
                     ->first();
 
             // Hanya buat entri jika ada salah satu absen
-                if ($absenMasuk || $absenKeluar) 
+                if ($absenMasuk || $absenKeluar)
                 {
                     $jamMasuk = $absenMasuk ? Carbon::parse($absenMasuk->waktu_absen) : null;
                     $jamKeluar = $absenKeluar ? Carbon::parse($absenKeluar->waktu_absen) : null;
@@ -120,7 +127,7 @@ class DashboardStaffController extends Controller
 
                     // Cek status masuk
                         if ($jamMasuk) {
-                            if ($jamMasuk->gt(Carbon::createFromTime(8, 0, 0))) 
+                            if ($jamMasuk->gt(Carbon::createFromTime(8, 0, 0)))
                                 {
                                     $statusMasuk = 'terlambat';
                                     $totalTerlambat++;
@@ -154,26 +161,34 @@ class DashboardStaffController extends Controller
             ],
             'statistik'           => [
         'tepat_waktu'             => $totalTepatWaktu . '%',
-        'terlambat'               => $totalTerlambat . '%', 
+        'terlambat'               => $totalTerlambat . '%',
         'izin'                    => $totalIzin . '%',
         'cuti'                    => $totalCuti . '%',
         'lembur'                  => $totalLembur . '%',
                                 ],
+
+'statistik_2'       => [
+                'tepat_waktu' => $totalTepatWaktu,
+                'terlambat'   => $totalTerlambat,
+                'izin'        => $totalIzin,
+                'cuti'        => $totalCuti,
+                'lembur'      => $totalLembur,
+            ],
         ]);
     }
 
     public function detail($id)
     {
         $today = now()->toDateString();
-        
+
         // Find the user's attendance data based on the ID
             $stat = null;
             $statistikId = 1;
-        
+
         // Get all non-admin users
             $users = User::where('role', '!=', 'admin')->get();
-        
-        foreach ($users as $user) 
+
+        foreach ($users as $user)
         {
             // Check for leave/permission submissions
                 $pengajuans = $user->pengajuanTidakHadir()
@@ -181,11 +196,11 @@ class DashboardStaffController extends Controller
                     ->where('status', '!=', 'ditolak')
                     ->get();
 
-            foreach ($pengajuans as $pengajuan) 
+            foreach ($pengajuans as $pengajuan)
             {
-                if (in_array($pengajuan->jenis_pengajuan, ['izin', 'cuti'])) 
+                if (in_array($pengajuan->jenis_pengajuan, ['izin', 'cuti']))
                     {
-                        if ($statistikId == $id) 
+                        if ($statistikId == $id)
                             {
                                 $stat = [
                                     'id'            => $statistikId,
@@ -201,9 +216,9 @@ class DashboardStaffController extends Controller
                             $statistikId++;
                     }
 
-                if ($pengajuan->jenis_pengajuan === 'lembur' && $pengajuan->tanggal_pengajuan == $today) 
+                if ($pengajuan->jenis_pengajuan === 'lembur' && $pengajuan->tanggal_pengajuan == $today)
                     {
-                        if ($statistikId == $id) 
+                        if ($statistikId == $id)
                             {
                                 $stat = [
                                     'nama'          => $user->username,
@@ -232,15 +247,15 @@ class DashboardStaffController extends Controller
                     ->orderBy('waktu_absen', 'desc')
                     ->first();
 
-            if ($absenMasuk || $absenKeluar) 
+            if ($absenMasuk || $absenKeluar)
             {
-                if ($statistikId == $id) 
+                if ($statistikId == $id)
                     {
                         $jamMasuk = $absenMasuk ? Carbon::parse($absenMasuk->waktu_absen) : null;
                         $jamKeluar = $absenKeluar ? Carbon::parse($absenKeluar->waktu_absen) : null;
 
                         $statusMasuk = null;
-                        if ($jamMasuk) 
+                        if ($jamMasuk)
                             {
                                 $statusMasuk = $jamMasuk->gt(Carbon::createFromTime(8, 0, 0)) ? 'terlambat' : 'masuk';
                             }
@@ -260,7 +275,7 @@ class DashboardStaffController extends Controller
             }
         }
 
-        if (!$stat) 
+        if (!$stat)
             {
                 return response()->json([
                     'message' => 'Data tidak ditemukan'
@@ -268,7 +283,7 @@ class DashboardStaffController extends Controller
             }
 
         // Cek apakah statusnya izin atau cuti
-        if (in_array($stat['status_masuk'], ['izin', 'cuti']) || in_array($stat['status_keluar'], ['izin', 'cuti'])) 
+        if (in_array($stat['status_masuk'], ['izin', 'cuti']) || in_array($stat['status_keluar'], ['izin', 'cuti']))
             {
                 $user = User::where('username', $stat['nama'])->first();
 
@@ -322,14 +337,14 @@ class DashboardStaffController extends Controller
         ];
 
         // Jika status keluar lembur, ambil dokumen lembur terbaru
-            if ($stat['status_keluar'] === 'lembur') 
+            if ($stat['status_keluar'] === 'lembur')
                 {
                     $pengajuanLembur = $user->pengajuanTidakHadir()
                         ->where('jenis_pengajuan', 'lembur')
                         ->latest()
                         ->first();
 
-                    if ($pengajuanLembur && $pengajuanLembur->dokumen) 
+                    if ($pengajuanLembur && $pengajuanLembur->dokumen)
                         {
                             $responseData['dokumen'] =('storage/' . $pengajuanLembur->dokumen);
                         }
@@ -348,26 +363,26 @@ class DashboardStaffController extends Controller
                     'search'          => 'nullable|string',
                     'page'            => 'nullable|integer|min:1',
                 ]);
-        
+
             // Pertama, update status untuk pengajuan yang sudah lewat batas waktu
                 $allPengajuan = DB::table('pengajuan_tidakhadir')
                     ->whereIn('status', ['diterima', 'ditolak'])
                     ->get();
-        
-            foreach ($allPengajuan as $pengajuan) 
+
+            foreach ($allPengajuan as $pengajuan)
             {
                 // Ekstrak tanggal dari format 'dd-mm-yyyy' atau 'dd-mm-yyyy s.d dd-mm-yyyy'
                     $tanggalArray = explode(' s.d ', $pengajuan->tanggal_pengajuan);
                     $tanggalTerakhir = end($tanggalArray);
-                
+
                 // Konversi format tanggal dari 'dd-mm-yyyy' ke 'yyyy-mm-dd'
                     $tanggalParts = explode('-', $tanggalTerakhir);
-                    if (count($tanggalParts) === 3) 
+                    if (count($tanggalParts) === 3)
                         {
                             $tanggalMysql = $tanggalParts[2].'-'.$tanggalParts[1].'-'.$tanggalParts[0];
-                            
+
                             // Bandingkan dengan tanggal sekarang
-                                if (strtotime($tanggalMysql) < strtotime(now()->format('Y-m-d'))) 
+                                if (strtotime($tanggalMysql) < strtotime(now()->format('Y-m-d')))
                                     {
                                         DB::table('pengajuan_tidakhadir')
                                             ->where('id', $pengajuan->id)
@@ -375,7 +390,7 @@ class DashboardStaffController extends Controller
                                     }
                         }
             }
-        
+
             // Query dasar
                 $query = DB::table('pengajuan_tidakhadir')
                     ->select(
@@ -388,25 +403,25 @@ class DashboardStaffController extends Controller
                         'pengajuan_tidakhadir.status',
                     )
                     ->whereIn('jenis_pengajuan', ['cuti', 'izin', 'lembur']);
-        
+
             // Terapkan filter jenis_pengajuan
-                if ($request->has('jenis_pengajuan') && $request->jenis_pengajuan !== 'semua') 
+                if ($request->has('jenis_pengajuan') && $request->jenis_pengajuan !== 'semua')
                     {
                         $query->where('jenis_pengajuan', $request->jenis_pengajuan);
                     }
-        
+
             // Urutkan berdasarkan status (proses di atas) dan kemudian berdasarkan tanggal terbaru
-                $query->orderByRaw("CASE 
-                        WHEN status = 'proses' THEN 0 
+                $query->orderByRaw("CASE
+                        WHEN status = 'proses' THEN 0
                         WHEN status = 'melewati_batas_waktu' THEN 1
-                        ELSE 2 
+                        ELSE 2
                     END")
                     ->orderBy('pengajuan_tidakhadir.created_at', 'desc');
-        
+
             // Paginasi hasil
                 $perPage = 10;
                 $pengajuan = $query->paginate($perPage);
-        
+
             return response()->json([
                 'success'          => true,
                 'message'          => 'Data pengajuan User berhasil diambil',
@@ -426,22 +441,22 @@ class DashboardStaffController extends Controller
                 $pengajuan = DB::table('pengajuan_tidakhadir')
                     ->where('id', $id)
                     ->first();
-        
+
             // Jika pengajuan tidak ditemukan
-            if (!$pengajuan) 
+            if (!$pengajuan)
                 {
                     return response()->json([
                         'success' => false,
                         'message' => 'Pengajuan tidak ditemukan'
                     ], 404);
                 }
-        
+
                 // Format URL dokumen yang bisa langsung diakses
                 // $dokumenUrl = null;
                 // if ($pengajuan->dokumen) {
                 //     $dokumenUrl = url('storage/' . $pengajuan->dokumen);
                 // }
-        
+
             // Format response dasar
                 $response = [
                     'nama'              => $pengajuan->nama,
@@ -453,25 +468,25 @@ class DashboardStaffController extends Controller
                     'dokumen'           => $pengajuan->dokumen,
                     // 'dokumen_url'    => $dokumenUrl
                 ];
-        
+
             // Tambahkan jenis_cuti hanya jika pengajuan adalah cuti
-                if ($pengajuan->jenis_pengajuan === 'cuti') 
+                if ($pengajuan->jenis_pengajuan === 'cuti')
                     {
                         $response['jenis_cuti'] = $pengajuan->jenis_cuti;
                     }
-        
+
             // Tampilkan status hanya jika masih 'proses'
-                if ($pengajuan->status === 'proses') 
+                if ($pengajuan->status === 'proses')
                     {
                         $response['status'] = $pengajuan->status;
                     }
 
              // Tampilkan alasan_penolakan jika status 'ditolak'
-                if ($pengajuan->status === 'ditolak') 
+                if ($pengajuan->status === 'ditolak')
                     {
                         $response['alasan_penolakan'] = $pengajuan->alasan_penolakan;
                     }
-        
+
                 return response()->json([
                     'success' => true,
                     'message' => 'Detail pengajuan berhasil diambil',

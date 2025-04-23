@@ -1,26 +1,74 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
 
 const DataCIL = () => {
+  const [requests, setRequests] = useState([]);
   const [dateFilter, setDateFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);  // Ganti sesuai jumlah yang diinginkan
+  const [currentTime, setCurrentTime] = useState('');
   const navigate = useNavigate();
 
-  const requests = [
-    { id: 1, name: 'Pegawai 1', position: 'Pegawai', type: 'Cuti', date: '2021-01-01', status: 'Ditolak' },
-    { id: 2, name: 'Pegawai 1', position: 'Pegawai', type: 'Cuti', date: '2021-01-01', status: 'Tanggal Kadaluarsa' },
-    { id: 3, name: 'Pegawai 2', position: 'Pegawai', type: 'Lembur', date: '2021-02-01', status: 'Diterima' },
-  ];
+  useEffect(() => {
+    const fetchRequests = async () => {
+      try {
+        const token = localStorage.getItem('token'); // ambil token dari localStorage
+        const response = await axios.get('http://127.0.0.1:8000/api/staff/pengajuan', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: {
+            page: currentPage,  // Kirimkan halaman saat ini ke backend
+            perPage: itemsPerPage,  // Jumlah data per halaman
+          },
+        });
+        setRequests(response.data.data);
+      } catch (error) {
+        console.error('Gagal mengambil data:', error);
+      }
+    };
+
+    fetchRequests();
+  }, [currentPage]); // Setiap kali currentPage berubah, fetch ulang data
+
+  useEffect(() => {
+    const updateTime = () => {
+      const options = { 
+        timeZone: 'Asia/Jakarta', 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric', 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit',
+      };
+      const time = new Date().toLocaleString('id-ID', options);
+      setCurrentTime(time);
+    };
+
+    updateTime();  // Set initial time
+    const intervalId = setInterval(updateTime, 1000);  // Update time every second
+
+    // Cleanup the interval when component unmounts
+    return () => clearInterval(intervalId);
+  }, []);
 
   const handleClick = () => {
-    navigate("/Staff/PengajuanCIL"); 
+    navigate("/Staff/PengajuanCIL");
   };
 
   const filteredRequests = requests.filter(request => {
-    const matchesDate = dateFilter ? request.date === dateFilter : true;
-    const matchesType = typeFilter ? request.type === typeFilter : true;
+    const matchesDate = dateFilter ? request.tanggal_pembuatan === dateFilter : true;
+    const matchesType = typeFilter ? request.jenis_pengajuan === typeFilter : true;
     return matchesDate && matchesType;
   });
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
 
   return (
     <div className="p-4 md:p-6 mt-10 min-h-screen">
@@ -28,7 +76,6 @@ const DataCIL = () => {
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-2 sm:space-y-0">
-
           <button
             onClick={handleClick}
             className="bg-yellow-500 text-white py-2 px-4 rounded w-full sm:w-auto"
@@ -49,16 +96,18 @@ const DataCIL = () => {
             onChange={(e) => setTypeFilter(e.target.value)}
           >
             <option value="">ALL</option>
-            <option value="Cuti">Cuti</option>
-            <option value="Lembur">Lembur</option>
+            <option value="cuti">Cuti</option>
+            <option value="lembur">Lembur</option>
+            <option value="izin">Izin</option>
           </select>
         </div>
         
-        <span className="text-gray-600 text-sm md:text-base">Senin 34 Februari 2060</span>
+        {/* Real-time Date and Time */}
+        <span className="text-gray-600 text-sm md:text-base">{currentTime}</span>
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full  shadow-md rounded-lg text-sm md:text-base">
+        <table className="w-full shadow-md rounded-lg text-sm md:text-base">
           <thead className="bg-gray-200">
             <tr>
               <th className="px-4 py-2">No</th>
@@ -71,19 +120,23 @@ const DataCIL = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredRequests.map(request => (
+            {filteredRequests.map((request, index) => (
               <tr key={request.id} className="border-b">
-                <td className="px-4 py-2">{request.id}</td>
-                <td className="px-4 py-2">{request.name}</td>
-                <td className="px-4 py-2">{request.position}</td>
+                <td className="px-4 py-2">{(currentPage - 1) * itemsPerPage + (index + 1)}</td>
+                <td className="px-4 py-2">{request.nama}</td>
+                <td className="px-4 py-2">{request.jabatan}</td>
                 <td className="px-4 py-2">
-                  <span className={`border rounded-full py-1 px-3 ${request.type === 'Cuti' ? 'bg-yellow-400' : ''}`}>
-                    {request.type}
+                  <span className={`border rounded-full py-1 px-3 ${request.jenis_pengajuan === 'Cuti' ? 'bg-yellow-400' : ''}`}>
+                    {request.jenis_pengajuan}
                   </span>
                 </td>
-                <td className="px-4 py-2">{request.date}</td>
+                <td className="px-4 py-2">{request.tanggal_pembuatan}</td>
                 <td className="px-4 py-2">
-                  <span className={`text-white py-1 px-3 rounded-full ${request.status === 'Ditolak' ? 'bg-red-500' : 'bg-gray-500'}`}>
+                  <span className={`text-white py-1 px-3 rounded-full ${
+                    request.status === 'Ditolak' ? 'bg-red-500' :
+                    request.status === 'Diterima' ? 'bg-green-500' :
+                    'bg-gray-500'
+                  }`}>
                     {request.status}
                   </span>
                 </td>
@@ -99,13 +152,25 @@ const DataCIL = () => {
       <div className="flex flex-col md:flex-row justify-between items-center mt-4 gap-2">
         <span className="text-sm">{filteredRequests.length} dari {requests.length} data</span>
         <div className="flex space-x-2">
-          <button className="py-1 px-3 border rounded">‹</button>
-          <button className="py-1 px-3 bg-blue-500 text-white rounded">1</button>
-          <button className="py-1 px-3 border rounded">2</button>
-          <button className="py-1 px-3 border rounded">3</button>
-          <button className="py-1 px-3 border rounded">4</button>
-          <button className="py-1 px-3 border rounded">5</button>
-          <button className="py-1 px-3 border rounded">›</button>
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            className="py-1 px-3 border rounded"
+            disabled={currentPage === 1}
+          >
+            ‹
+          </button>
+          <button
+            onClick={() => handlePageChange(currentPage)}
+            className="py-1 px-3 bg-blue-500 text-white rounded"
+          >
+            {currentPage}
+          </button>
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            className="py-1 px-3 border rounded"
+          >
+            ›
+          </button>
         </div>
       </div>
     </div>

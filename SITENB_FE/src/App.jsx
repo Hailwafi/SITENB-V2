@@ -45,9 +45,10 @@ const TiketPublic = lazy(() => import('./pages/Dashboard/TiketPublic'));
 const StaffList = lazy(() => import('./pages/Dashboard/StaffList'));
 const StaffDetail = lazy(() => import('./pages/Dashboard/StaffDetail'));
 const DataAb = lazy(() => import('./pages/Dashboard/DataAb'));
-const DetailAbPg = lazy(() => import('./pages/Dashboard/DetailAbPg'));
+const DetailAbP = lazy(() => import('./pages/Dashboard/DetailAbP'));
 const DataSI = lazy(() => import('./pages/Dashboard/DataSI'));
 const DetailSI = lazy(() => import('./pages/Dashboard/DetailSI'));
+const DetailPgj = lazy(() => import('./pages/Dashboard/DetailPgj'));
 
 const WorkStaff = lazy(() => import('./pages/Dashboard/Admin/WorkStaff'));
 const ListUser = lazy(() => import('./pages/Dashboard/Admin/ListUser'));
@@ -116,7 +117,8 @@ const AdminLayout = withAuthenticationAdmin(() => {
             <Route path="/DataAb" element={<DataAb />} />
             <Route path="/DataSI" element={<DataSI />} />
             <Route path="/DetailSI" element={<DetailSI />} />
-            <Route path="/DetailAbPg" element={<DetailAbPg />} />
+            <Route path="/DetailAbP" element={<DetailAbP />} />
+            <Route path="/DetailPgj/:id" element={<DetailPgj />} />
           </Routes>
         </Suspense>
       </div>

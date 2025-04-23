@@ -99,7 +99,7 @@ use Illuminate\Support\Facades\Route;
             Route::get('search/publik-tickets', [App\Http\Controllers\PublikController::class, 'search'])
             ->middleware('permission:publiks.search');
 
-         // statistik absensi 
+         // statistik absensi
             Route::get('/statistik-absensi', [App\Http\Controllers\Api\Admin\DashboardController::class, 'statistikAbsensi'])
             ->middleware('auth:api');
 
@@ -116,7 +116,7 @@ use Illuminate\Support\Facades\Route;
             ->middleware('auth:api');
 
         // vertifikasi pengajuan dari admin
-            Route::post('/pengajuan/{id}/verifikasi', [App\Http\Controllers\PengajuanTidakHadirController::class, 'verifikasi']);  
+            Route::post('/pengajuan/{id}/verifikasi', [App\Http\Controllers\PengajuanTidakHadirController::class, 'verifikasi']);
 
         // dashboard
             Route::get('/dashboard', App\Http\Controllers\Api\Admin\DashboardController::class);
@@ -223,7 +223,7 @@ use Illuminate\Support\Facades\Route;
             Route::get('search/publik-tickets', [App\Http\Controllers\PublikController::class, 'search'])
             ->middleware('permission:publiks.search');
 
-        // statistik absensi 
+        // statistik absensi
             Route::get('/statistik-absensi', [App\Http\Controllers\Api\Admin\DashboardController::class, 'statistikAbsensi'])
             ->middleware('auth:api');
 
@@ -240,7 +240,7 @@ use Illuminate\Support\Facades\Route;
             ->middleware('auth:api');
 
         // vertifikasi pengajuan dari admin
-            Route::post('/pengajuan/{id}/verifikasi', [App\Http\Controllers\PengajuanTidakHadirController::class, 'verifikasi']);  
+            Route::post('/pengajuan/{id}/verifikasi', [App\Http\Controllers\PengajuanTidakHadirController::class, 'verifikasi']);
 
         // dashboard
             Route::get('/dashboard', App\Http\Controllers\Api\Admin\DashboardController::class);
@@ -371,7 +371,8 @@ use Illuminate\Support\Facades\Route;
             ->middleware('auth:api');
 
         // absen
-            Route::post('/absen', [App\Http\Controllers\AbsenController::class, 'absen']);
+            Route::post('/absen', [App\Http\Controllers\AbsenController::class, 'absen'])
+            ->middleware('auth:api');
 
          // pengajuan cuti/izin/lembur
             Route::get('/lihat', [App\Http\Controllers\PengajuanTidakHadirController::class, 'index']);

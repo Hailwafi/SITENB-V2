@@ -39,7 +39,8 @@ const Sign = () => {
       // localStorage.setItem('user_id', user_id);  // Menyimpan user_id
       localStorage.setItem('role', response.data.role);
       localStorage.setItem('permissions', JSON.stringify(response.data.permissions));
-      
+      localStorage.setItem("user_id", response.data.user.id); 
+
       const { role } = response.data; 
       
       if (role === 'admin') {

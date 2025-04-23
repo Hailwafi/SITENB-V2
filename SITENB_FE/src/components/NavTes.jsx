@@ -41,7 +41,7 @@ export default function NavTes({ isOpen, toggleNav }) {
     staff: [
       { name: "Absensi", href: "/Staff/Absen", icon: FaFileExport },
       { name: "Absensi", href: "/Staff/DataCIL", icon: FaFileExport },
-      { name: "Absensi", href: "/Staff/PresentaseAB", icon: FaFileExport },
+      { name: "Absensi", href: "/Staff/PersentaseAB", icon: FaFileExport },
     ],
   };
   const dropdownItemsAK = {
