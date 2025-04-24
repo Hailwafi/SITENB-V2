@@ -136,7 +136,7 @@ const Absen = () => {
   
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen  flex flex-col items-center justify-center p-4">
       <motion.h1
         className="text-xl font-bold text-gray-700 mb-2"
         initial={{ opacity: 0 }}

@@ -545,6 +545,7 @@ class DashboardController extends Controller
                 'tanggal_pengajuan' => $pengajuan->tanggal_pengajuan,
                 'catatan'           => $pengajuan->catatan,
                 'dokumen'           => $pengajuan->dokumen,
+                'status'           => $pengajuan->status,
                 // 'dokumen_url' => $dokumenUrl // URL yang bisa langsung diklik
             ];
 

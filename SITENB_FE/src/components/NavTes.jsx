@@ -6,7 +6,7 @@ import {
   FolderIcon,
   ChevronDownIcon,
 } from "@heroicons/react/24/outline";
-import { FaUserPlus, FaUserTie, FaFileExport ,FaChartBar,FaAlignLeft,FaTicketAlt} from "react-icons/fa";
+import { FaUserPlus, FaUserTie, FaFileExport ,FaChartBar,FaAlignLeft,FaTicketAlt,FaDatabase } from "react-icons/fa";
 import { Link, useLocation } from "react-router-dom";
 
 export default function NavTes({ isOpen, toggleNav }) {
@@ -40,8 +40,8 @@ export default function NavTes({ isOpen, toggleNav }) {
     ],
     staff: [
       { name: "Absensi", href: "/Staff/Absen", icon: FaFileExport },
-      { name: "Absensi", href: "/Staff/DataCIL", icon: FaFileExport },
-      { name: "Absensi", href: "/Staff/PersentaseAB", icon: FaFileExport },
+      { name: "DataCIL", href: "/Staff/DataCIL", icon: FaDatabase  },
+      { name: "PersentaseAB", href: "/Staff/PersentaseAB", icon: FaChartBar },
     ],
   };
   const dropdownItemsAK = {
@@ -77,7 +77,7 @@ export default function NavTes({ isOpen, toggleNav }) {
         <div className="flex items-center justify-between px-4 mt-4">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <img src="bnpt.png" alt="Logo" className="h-12 w-auto" />
+            <img src="/bnpt.png" alt="Logo" className="h-12 w-auto" />
             <h1 className="text-lg font-semibold text-gray-700">SI-TENB</h1>
           </div>
 
