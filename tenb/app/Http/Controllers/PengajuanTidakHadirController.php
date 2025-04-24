@@ -81,7 +81,7 @@ class PengajuanTidakHadirController extends Controller
             }
 
             // Simpan dokumen
-            $dokumenPath = $request->file('dokumen')->store('kontol', 'public');
+            $dokumenPath = $request->file('dokumen')->store('gambar', 'public');
 
             // Jika lembur, update absen keluar hari ini
             if ($request->jenis_pengajuan === 'lembur') {

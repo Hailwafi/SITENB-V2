@@ -12,14 +12,14 @@ class AbsenController extends Controller
 {
     private $allowedLatitude = -6.6059344;
     private $allowedLongitude = 106.7758339;
-    private $radius = 0.005; // 5 meter
+    private $radius = 5; // 5km
 
     public function absen(Request $request)
     {
         $user = $request->user(); // Ambil user dari bearer token
 
         $request->validate([
-            'status'    => 'required|in:masuk,keluar',
+            'status'    => 'required|in:masuk,keluar,lembur',
             'latitude'  => 'required|numeric',
             'longitude' => 'required|numeric',
             'foto'      => 'required|image|mimes:jpeg,png,jpg|max:2048'
@@ -59,8 +59,27 @@ class AbsenController extends Controller
         }
 
         // Handle pengambilan foto
-        $fotoPath = $request->file('foto')->store('profile_photos', 'public');
-        $fotoUrl = Storage::url($fotoPath);
+            if ($request->hasFile('foto')) 
+            {
+                // Jika dikirim sebagai file biasa
+                    $fotoPath = $request->file('foto')->store('profile_photos', 'public');
+            } elseif (preg_match('/^data:image\/(\w+);base64,/', $request->foto)) 
+            {
+                // Jika dikirim sebagai base64
+                    $fotoData = $request->foto;
+                    $image = str_replace('data:image/jpeg;base64,', '', $fotoData);
+                    $image = str_replace('data:image/png;base64,', '', $image);
+                    $image = str_replace(' ', '+', $image);
+                    $imageName = 'profile_photos/' . uniqid() . '.jpg';
+                    Storage::disk('public')->put($imageName, base64_decode($image));
+                    $fotoPath = $imageName;
+            } else {
+                return response()->json([
+                    'message' => 'Format foto tidak dikenali.',
+                    'status'  => 'failed'
+                ], 400);
+            }
+            $fotoUrl = Storage::url($fotoPath);
 
         // Tentukan status dan keterangan
         $status = $request->status;

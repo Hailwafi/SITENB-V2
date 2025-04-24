@@ -37,6 +37,13 @@ class UserDashboardController extends Controller
             $totalCuti = 0;
             $totalLembur = 0;
 
+            // Hitung statistik manual
+            $totalTepatWaktu = 0;
+            $totalTerlambat = 0;
+            $totalIzin = 0;
+            $totalCuti = 0;
+            $totalLembur = 0;
+
         foreach ($users as $user) 
         {
             // Pengajuan tidak hadir (izin, cuti, lembur)
@@ -122,13 +129,21 @@ class UserDashboardController extends Controller
                 'total'           => $users->total(),
                 'total_statistik' => $totalKaryawan,
             ],
-            'statistik'           => [
+            'persentase'           => [
         'tepat_waktu'             => $totalTepatWaktu . '%',
         'terlambat'               => $totalTerlambat . '%', 
         'izin'                    => $totalIzin . '%',
         'cuti'                    => $totalCuti . '%',
         'lembur'                  => $totalLembur . '%',
                                 ],
+
+                                'statistik_2'       => [
+                'tepat_waktu' => $totalTepatWaktu,
+                'terlambat'   => $totalTerlambat,
+                'izin'        => $totalIzin,
+                'cuti'        => $totalCuti,
+                'lembur'      => $totalLembur,
+            ],
         ]);
     }
 
